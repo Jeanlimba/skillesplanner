@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block page_title_text %}Planification des Formations{% endblock %}
+
+{% block extra_actions %}
+<div class="btn-list">
+    <a href="{% url 'creer_planification' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> Nouvelle Planification
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row row-deck row-cards">
+    <!-- Statistiques -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-primary text-white avatar">
+                            <i class="fas fa-list"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">{{ stats.total }} Planifications</div>
+                        <div class="text-muted">Total</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-warning text-white avatar">
+                            <i class="fas fa-edit"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">{{ stats.brouillons }} Brouillons</div>
+                        <div class="text-muted">En attente</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-success text-white avatar">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">{{ stats.validees }} Validées</div>
+                        <div class="text-muted">Approuvées</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-info text-white avatar">
+                            <i class="fas fa-euro-sign"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">{{ stats.cout_total }} €</div>
+                        <div class="text-muted">Coût total</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des Planifications -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Liste des Planifications</h3>
+            </div>
+            <div class="card-body">
+                {% if planifications %}
+                <div class="table-responsive">
+                    <table class="table table-vcenter table-mobile-md card-table">
+                        <thead>
+                            <tr>
+                                <th>Employé</th>
+                                <th>Formation</th>
+                                <th>Type</th>
+                                <th>Coût</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th class="w-1"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dans la boucle des planifications - CORRIGER -->
+                        {% for planif in planifications %}
+                        <tr>
+                            <td data-label="Employé">
+                                <div class="d-flex py-1 align-items-center">
+                                    {% with premier_employe=planif.employes.first %}
+                                    {% if premier_employe %}
+                                    <span class="avatar me-2" style="background-image: url(https://ui-avatars.com/api/?name={{ premier_employe.nom_complet|urlencode }}&background=206bc4&color=fff)"></span>
+                                    <div class="flex-fill">
+                                        <div class="font-weight-medium">
+                                            {% if planif.nombre_participants == 1 %}
+                                                {{ premier_employe.nom_complet }}
+                                            {% else %}
+                                                {{ planif.nombre_participants }} participants
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-muted">{{ premier_employe.poste }}</div>
+                                        {% if premier_employe.departement %}
+                                        <small class="text-muted">{{ premier_employe.departement.nom }}</small>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <span class="avatar me-2">?</span>
+                                    <div class="flex-fill">
+                                        <div class="font-weight-medium text-muted">Aucun participant</div>
+                                    </div>
+                                    {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </td>
+                            <td data-label="Formation">
+                                <div>{{ planif.formation_nom }}</div>
+                                <div class="text-muted">{{ planif.get_modalite_display }}</div>
+                            </td>
+                            <td data-label="Type">
+                                <span class="badge bg-{% if planif.type_formation == 'I' %}primary{% else %}info{% endif %}">
+                                    {{ planif.get_type_formation_display }}
+                                </span>
+                            </td>
+                            <td data-label="Coût">
+                                <div class="font-weight-bold">{{ planif.cout_total }} €</div>
+                                {% if planif.nombre_participants > 1 %}
+                                <small class="text-muted">{{ planif.cout_par_participant|floatformat:2 }} €/pers</small>
+                                {% endif %}
+                            </td>
+                            <td data-label="Statut">
+                                {% if planif.statut == 'B' %}
+                                    <span class="badge bg-secondary">{{ planif.get_statut_display }}</span>
+                                {% elif planif.statut == 'V' %}
+                                    <span class="badge bg-success">{{ planif.get_statut_display }}</span>
+                                {% elif planif.statut == 'C' %}
+                                    <span class="badge bg-primary">{{ planif.get_statut_display }}</span>
+                                {% elif planif.statut == 'P' %}
+                                    <span class="badge bg-warning">{{ planif.get_statut_display }}</span>
+                                {% elif planif.statut == 'T' %}
+                                    <span class="badge bg-info">{{ planif.get_statut_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ planif.get_statut_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Date">
+                                <div class="text-muted">{{ planif.date_creation|date:"d/m/Y" }}</div>
+                            </td>
+                            <td>
+                                <div class="btn-list flex-nowrap">
+                                    <a href="{% url 'detail_planification' planif.id %}" class="btn btn-icon" title="Voir détails">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-icon" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty">
+                    <div class="empty-img">
+                        <i class="fas fa-calendar-plus fa-4x text-muted"></i>
+                    </div>
+                    <p class="empty-title">Aucune planification créée</p>
+                    <p class="empty-subtitle text-muted">
+                        Commencez par créer votre première planification de formation
+                    </p>
+                    <div class="empty-action">
+                        <a href="{% url 'creer_planification' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Créer une Planification
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

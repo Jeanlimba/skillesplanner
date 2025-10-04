@@ -1,0 +1,154 @@
+<!-- planification/templates/planification/etape_informations.html -->
+{% extends 'base.html' %}
+
+{% block page_title_text %}Informations Générales{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Barre de progression -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="step-progress">
+                    <div class="step active">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Identification</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Participants</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Objectifs</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Formateur</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Programme</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">6</div>
+                        <div class="step-label">Évaluation</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">7</div>
+                        <div class="step-label">Budget</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-info-circle me-2"></i>Étape 1: Identification de la Formation
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Identification -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Identification</h5>
+                        <div class="mb-3">
+                            <label for="titre_formation" class="form-label">Titre de la formation *</label>
+                            <input type="text" name="titre_formation" class="form-control" id="titre_formation" 
+                                   placeholder="Ex: Formation Techniques de Vente Avancées" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Type de formation *</label>
+                                    <div class="form-selectgroup">
+                                        <label class="form-selectgroup-item">
+                                            <input type="radio" name="type_formation" value="I" class="form-selectgroup-input" checked>
+                                            <span class="form-selectgroup-label">
+                                                <i class="fas fa-building me-2"></i>
+                                                Interne
+                                            </span>
+                                        </label>
+                                        <label class="form-selectgroup-item">
+                                            <input type="radio" name="type_formation" value="E" class="form-selectgroup-input">
+                                            <span class="form-selectgroup-label">
+                                                <i class="fas fa-external-link-alt me-2"></i>
+                                                Externe
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="modalite" class="form-label">Modalité *</label>
+                                    <select name="modalite" id="modalite" class="form-select" required>
+                                        <option value="S">En Salle</option>
+                                        <option value="L">En Ligne</option>
+                                        <option value="T">Entrainement à la Tâche</option>
+                                        <option value="M">Mentorat</option>
+                                        <option value="U">Tutorat</option>
+                                        <option value="H">Hybride</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Durée et lieu -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Durée et Lieu</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="duree_totale_heures" class="form-label">Durée totale (heures) *</label>
+                                    <input type="number" name="duree_totale_heures" class="form-control" 
+                                           id="duree_totale_heures" step="0.5" min="1" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="duree_totale_jours" class="form-label">Durée totale (jours)</label>
+                                    <input type="number" name="duree_totale_jours" class="form-control" 
+                                           id="duree_totale_jours" min="1">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="lieu_formation" class="form-label">Lieu de formation *</label>
+                                    <input type="text" name="lieu_formation" class="form-control" 
+                                           id="lieu_formation" placeholder="Ex: Salle de formation interne" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Justification -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Justification</h5>
+                        <div class="mb-3">
+                            <label for="situation_problematique" class="form-label">Situation à améliorer ou problématique *</label>
+                            <textarea name="situation_problematique" class="form-control" id="situation_problematique" 
+                                      rows="3" placeholder="Ex: Manque de maîtrise des outils de vente modernes affectant les performances commerciales..." required></textarea>
+                            <div class="form-text">Décrivez la situation qui justifie cette formation</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'creer_planification' %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-1"></i> Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Suivant <i class="fas fa-arrow-right me-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

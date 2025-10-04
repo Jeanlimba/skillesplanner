@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-clipboard-list"></i> Évaluation des Besoins</h1>
+    <a href="{% url 'creer_evaluation' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nouvelle Évaluation
+    </a>
+</div>
+
+<!-- Cartes de statistiques -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ stats.total }}</h4>
+                        <p class="card-text">Évaluations totales</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clipboard-list fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ stats.en_cours }}</h4>
+                        <p class="card-text">En cours</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-spinner fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ stats.terminees }}</h4>
+                        <p class="card-text">Terminées</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liste des évaluations -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Historique des Évaluations</h5>
+    </div>
+    <div class="card-body">
+        {% if evaluations %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Intitulé</th>
+                        <th>Type</th>
+                        <th>Période</th>
+                        <th>Statut</th>
+                        <th>Créateur</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for eval in evaluations %}
+                    <tr>
+                        <td>
+                            <strong>{{ eval.intitule }}</strong>
+                            <br><small class="text-muted">{{ eval.description|truncatewords:10 }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ eval.get_type_evaluation_display }}</span>
+                        </td>
+                        <td>
+                            {{ eval.date_debut|date:"d/m/Y" }} - {{ eval.date_fin|date:"d/m/Y" }}
+                        </td>
+                        <td>
+                            {% if eval.statut == 'B' %}
+                                <span class="badge bg-secondary">{{ eval.get_statut_display }}</span>
+                            {% elif eval.statut == 'E' %}
+                                <span class="badge bg-warning">{{ eval.get_statut_display }}</span>
+                            {% elif eval.statut == 'T' %}
+                                <span class="badge bg-success">{{ eval.get_statut_display }}</span>
+                            {% else %}
+                                <span class="badge bg-primary">{{ eval.get_statut_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ eval.createur.get_full_name }}</td>
+                        <td>
+                            <a href="{% url 'detail_evaluation' eval.id %}" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Aucune évaluation créée</h5>
+            <p class="text-muted">Commencez par créer votre première évaluation des besoins</p>
+            <a href="{% url 'creer_evaluation' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Créer une Évaluation
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

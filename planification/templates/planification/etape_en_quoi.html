@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-book"></i> Étape 2: En quoi former ?</h1>
+    <a href="{% url 'etape_qui' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Retour
+    </a>
+</div>
+
+<!-- Barre de progression -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="step-progress">
+            <div class="step completed">
+                <div class="step-number">1</div>
+                <div class="step-label">Qui</div>
+            </div>
+            <div class="step active">
+                <div class="step-number">2</div>
+                <div class="step-label">En quoi</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-label">Par qui</div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-label">Coût</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Détails de la formation</h5>
+        <p class="text-muted">Employé sélectionné: <strong>{{ employe.nom_complet }}</strong></p>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Type de formation *</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="type_formation" id="type_interne" value="I" checked>
+                                <label class="form-check-label" for="type_interne">Interne</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="type_formation" id="type_externe" value="E">
+                                <label class="form-check-label" for="type_externe">Externe</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="modalite" class="form-label">Modalité *</label>
+                        <select name="modalite" id="modalite" class="form-select" required>
+                            <option value="S">En Salle</option>
+                            <option value="L">En Ligne</option>
+                            <option value="T">Entrainement à la Tâche</option>
+                            <option value="M">Mentorat</option>
+                            <option value="U">Tutorat</option>
+                            <option value="H">Hybride</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="formation_existante" class="form-label">Formation (si existante)</label>
+                <select name="formation_existante" id="formation_existante" class="form-select">
+                    <option value="">Sélectionnez une formation...</option>
+                    {% for formation in formations %}
+                    <option value="{{ formation.id }}">{{ formation.intitule }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">Laissez vide pour une formation sur mesure</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="formation_sur_mesure" class="form-label">Formation sur mesure</label>
+                <input type="text" name="formation_sur_mesure" class="form-control" id="formation_sur_mesure" 
+                       placeholder="Nom de la formation personnalisée">
+            </div>
+            
+            <div class="mb-3">
+                <label for="objectif" class="form-label">Objectif de la formation *</label>
+                <textarea name="objectif" class="form-control" id="objectif" rows="3" required 
+                          placeholder="Quel est l'objectif principal de cette formation ?"></textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="resultat_attendu" class="form-label">Résultat attendu *</label>
+                <textarea name="resultat_attendu" class="form-control" id="resultat_attendu" rows="3" required 
+                          placeholder="Quels résultats concrets attendez-vous ?"></textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="performance_attendu" class="form-label">Performance attendue *</label>
+                <textarea name="performance_attendu" class="form-control" id="performance_attendu" rows="3" required 
+                          placeholder="Quelles améliorations de performance sont attendues ?"></textarea>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'etape_qui' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Précédent
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    Suivant <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

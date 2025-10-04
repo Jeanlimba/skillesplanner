@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block page_title_text %}Tableau de Bord{% endblock %}
+
+{% block extra_actions %}
+<span class="d-none d-sm-inline">
+    <a href="{% url 'creer_planification' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> Nouvelle Planification
+    </a>
+</span>
+{% endblock %}
+
+{% block content %}
+<div class="row row-deck row-cards">
+    <!-- KPIs Principaux -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="subheader">Sessions de formation</div>
+                </div>
+                <div class="h1 mb-3">{{ sessions_total }}</div>
+                <div class="d-flex mb-2">
+                    <div>Total des sessions planifiées</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="subheader">Employés formés</div>
+                </div>
+                <div class="h1 mb-3">{{ employes_formes }}/{{ total_employes }}</div>
+                <div class="d-flex mb-2">
+                    <div>{{ employes_formes }} employés sur {{ total_employes }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="subheader">Coût total</div>
+                </div>
+                <div class="h1 mb-3">{{ cout_total }} €</div>
+                <div class="d-flex mb-2">
+                    <div>Investissement formation</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="subheader">Évaluations</div>
+                </div>
+                <div class="h1 mb-3">{{ evaluations_total }}</div>
+                <div class="d-flex mb-2">
+                    <div>Besoins identifiés</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques et Statistiques -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Statut des Sessions</h3>
+            </div>
+            <div class="card-body">
+                <div class="chart-sm">
+                    <canvas id="chart-sessions"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Planifications Récentes</h3>
+            </div>
+            <div class="card-body">
+                {% if recentes %}
+                <div class="list-group list-group-flush">
+                    {% for planif in recentes %}
+                    <div class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="badge bg-{% if planif.statut == 'B' %}secondary{% elif planif.statut == 'V' %}success{% else %}primary{% endif %}">
+                                    {{ planif.get_statut_display }}
+                                </span>
+                            </div>
+                            <div class="col text-truncate">
+                                <a href="{% url 'detail_planification' planif.id %}" class="text-reset d-block">
+                                    {{ planif.formation_nom }}
+                                </a>
+                                <div class="text-muted text-truncate mt-n1">{{ planif.employe.nom_complet }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <span class="text-success fw-bold">{{ planif.cout_total }} €</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar-plus fa-2x text-muted mb-3"></i>
+                    <h4 class="text-muted">Aucune planification</h4>
+                    <p class="text-muted">Commencez par créer votre première planification</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Accès Rapide -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Accès Rapide</h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-sm-6 col-lg-3">
+                        <a href="{% url 'evaluation_besoins' %}" class="card card-sm card-hover">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span class="bg-primary text-white avatar">
+                                            <i class="fas fa-clipboard-list"></i>
+                                        </span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="font-weight-medium">Évaluation</div>
+                                        <div class="text-muted">Besoins en formation</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <a href="{% url 'planification_formations' %}" class="card card-sm card-hover">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span class="bg-success text-white avatar">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="font-weight-medium">Planification</div>
+                                        <div class="text-muted">Créer une formation</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <a href="{% url 'liste_employes' %}" class="card card-sm card-hover">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span class="bg-info text-white avatar">
+                                            <i class="fas fa-users"></i>
+                                        </span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="font-weight-medium">Employés</div>
+                                        <div class="text-muted">Gérer les collaborateurs</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <a href="{% url 'tableau_finances' %}" class="card card-sm card-hover">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span class="bg-warning text-white avatar">
+                                            <i class="fas fa-chart-line"></i>
+                                        </span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="font-weight-medium">Finances</div>
+                                        <div class="text-muted">Suivi budgétaire</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Graphique des sessions
+    const ctx = document.getElementById('chart-sessions').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for stat in stats_sessions %}'{{ stat.get_statut_display }}',{% endfor %}],
+            datasets: [{
+                data: [{% for stat in stats_sessions %}{{ stat.count }},{% endfor %}],
+                backgroundColor: [
+                    '#206bc4', '#4299e1', '#2fb344', '#f76707', '#e64980', '#5c7cfa'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

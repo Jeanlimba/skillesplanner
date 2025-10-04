@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-users"></i> Gestion des Employés</h1>
+    <a href="{% url 'ajouter_employe' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Ajouter un employé
+    </a>
+</div>
+
+<!-- Filtres -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="departement" class="form-label">Filtrer par département</label>
+                <select name="departement" id="departement" class="form-select" onchange="this.form.submit()">
+                    <option value="">Tous les départements</option>
+                    {% for dept in departements %}
+                    <option value="{{ dept.id }}" {% if request.GET.departement == dept.id|stringformat:"i" %}selected{% endif %}>
+                        {{ dept.nom }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tableau des employés -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Matricule</th>
+                        <th>Nom</th>
+                        <th>Département</th>
+                        <th>Poste</th>
+                        <th>Responsable</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employe in employes %}
+                    <tr>
+                        <td>{{ employe.matricule }}</td>
+                        <td>{{ employe.nom_complet }}</td>
+                        <td>{{ employe.departement.nom|default:"-" }}</td>
+                        <td>{{ employe.poste }}</td>
+                        <td>
+                            {% if employe.est_responsable %}
+                            <span class="badge bg-success">Oui</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Non</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'detail_employe' employe.id %}" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'modifier_employe' employe.id %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">Aucun employé trouvé</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

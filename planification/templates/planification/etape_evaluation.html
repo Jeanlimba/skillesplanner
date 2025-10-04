@@ -1,0 +1,179 @@
+<!-- planification/templates/planification/etape_evaluation.html -->
+{% extends 'base.html' %}
+
+{% block page_title_text %}Évaluation & Suivi{% endblock %}
+
+{% block extra_actions %}
+<a href="{% url 'etape_programme' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i> Retour
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Barre de progression améliorée -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="step-progress">
+                    <div class="step completed">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Informations</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Participants</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Objectifs</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Formateur</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Programme</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-number">6</div>
+                        <div class="step-label">Évaluation</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">7</div>
+                        <div class="step-label">Budget</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-clipboard-check me-2"></i>Étape 6: Évaluation & Suivi
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Évaluations -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Dispositif d'Évaluation</h5>
+                        
+                        <div class="mb-3">
+                            <label for="evaluation_diagnostique" class="form-label">Évaluation Diagnostique (avant formation)</label>
+                            <textarea name="evaluation_diagnostique" class="form-control" id="evaluation_diagnostique" 
+                                      rows="3" placeholder="Test de positionnement, questionnaire pré-formation, entretien individuel..."></textarea>
+                            <div class="form-text">Évaluation des prérequis et du niveau initial des participants</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="evaluation_formative" class="form-label">Évaluation Formative (pendant la formation)</label>
+                            <textarea name="evaluation_formative" class="form-control" id="evaluation_formative" 
+                                      rows="3" placeholder="Quiz, exercices pratiques, observations, auto-évaluation..."></textarea>
+                            <div class="form-text">Évaluation continue pour réguler l'apprentissage et adapter le rythme</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="evaluation_sommative" class="form-label">Évaluation Sommative (à l'issue de la formation)</label>
+                            <textarea name="evaluation_sommative" class="form-control" id="evaluation_sommative" 
+                                      rows="3" placeholder="Examen final, mise en situation, production, présentation..."></textarea>
+                            <div class="form-text">Évaluation finale des acquis et de l'atteinte des objectifs</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="evaluation_froide" class="form-label">Évaluation à Froid (3 mois après)</label>
+                            <textarea name="evaluation_froide" class="form-control" id="evaluation_froide" 
+                                      rows="3" placeholder="Questionnaire de satisfaction, entretien avec le manager, observation en situation de travail..."></textarea>
+                            <div class="form-text">Mesure de l'impact en situation de travail et du transfert des compétences</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="mode_evaluation" class="form-label">Mode d'Évaluation Principal</label>
+                            <select name="mode_evaluation" id="mode_evaluation" class="form-select">
+                                <option value="">Sélectionnez un mode...</option>
+                                <option value="QCM">Questionnaire à choix multiples</option>
+                                <option value="PRATIQUE">Évaluation pratique</option>
+                                <option value="ORAL">Entretien oral</option>
+                                <option value="PRODUCTION">Production écrite</option>
+                                <option value="OBSERVATION">Observation directe</option>
+                                <option value="PORTFOLIO">Portfolio de preuves</option>
+                                <option value="AUTO">Auto-évaluation</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Risques et contraintes -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Gestion des Risques et Contraintes</h5>
+                        
+                        <div class="mb-3">
+                            <label for="contraintes_logistiques" class="form-label">Contraintes Logistiques</label>
+                            <textarea name="contraintes_logistiques" class="form-control" id="contraintes_logistiques" 
+                                      rows="2" placeholder="Salle, matériel, connexion internet, accessibilité..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="risques_pedagogiques" class="form-label">Risques Pédagogiques</label>
+                            <textarea name="risques_pedagogiques" class="form-control" id="risques_pedagogiques" 
+                                      rows="2" placeholder="Niveaux hétérogènes, résistance au changement, difficultés d'apprentissage..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="plan_secours" class="form-label">Plan de Secours</label>
+                            <textarea name="plan_secours" class="form-control" id="plan_secours" 
+                                      rows="2" placeholder="Solutions alternatives en cas de problème technique, absence du formateur..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="materiel_requis" class="form-label">Matériel Requis pour la Formation</label>
+                            <textarea name="materiel_requis" class="form-control" id="materiel_requis" 
+                                      rows="2" placeholder="Ordinateurs, projecteur, paperboard, documents..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Suivi post-formation -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Suivi Post-Formation</h5>
+                        
+                        <div class="mb-3">
+                            <label for="plan_action" class="form-label">Plan d'Action Individuel</label>
+                            <textarea name="plan_action" class="form-control" id="plan_action" 
+                                      rows="3" placeholder="Actions concrètes à mettre en œuvre après la formation, objectifs personnels..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="modalites_suivi" class="form-label">Modalités de Suivi</label>
+                            <textarea name="modalites_suivi" class="form-control" id="modalites_suivi" 
+                                      rows="2" placeholder="Entretiens individuels, observations, reporting, réunions de suivi..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="ressources_complementaires" class="form-label">Ressources Complémentaires</label>
+                            <textarea name="ressources_complementaires" class="form-control" id="ressources_complementaires" 
+                                      rows="2" placeholder="Documentation, tutoriels, communauté de pratique, support en ligne..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Félicitations !</strong> Vous avez presque terminé la planification complète de la formation.
+                        La dernière étape concerne le budget et le financement.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'etape_programme' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Précédent
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Suivant <i class="fas fa-arrow-right me-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

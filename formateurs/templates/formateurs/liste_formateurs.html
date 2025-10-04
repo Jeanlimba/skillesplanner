@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-chalkboard-teacher"></i> Liste des Formateurs</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if formateurs %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Type</th>
+                        <th>Organisme</th>
+                        <th>Tarif horaire</th>
+                        <th>Contact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for formateur in formateurs %}
+                    <tr>
+                        <td>{{ formateur.nom_complet }}</td>
+                        <td>
+                            <span class="badge bg-{% if formateur.type_formateur == 'I' %}primary{% else %}info{% endif %}">
+                                {{ formateur.get_type_formateur_display }}
+                            </span>
+                        </td>
+                        <td>{{ formateur.organisme|default:"-" }}</td>
+                        <td>{{ formateur.tarif_horaire }} €/h</td>
+                        <td>{{ formateur.email }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">Aucun formateur enregistré</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

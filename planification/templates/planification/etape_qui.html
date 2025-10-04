@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+
+{% block page_title_text %}Participants de la Formation{% endblock %}
+
+{% block extra_actions %}
+<a href="{% url 'etape_informations' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i> Retour
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Barre de progression -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="step-progress">
+                    <div class="step completed">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Informations</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Participants</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Objectifs</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Formateur</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Programme</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">6</div>
+                        <div class="step-label">Évaluation</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">7</div>
+                        <div class="step-label">Budget</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Section Ajout d'employés -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-user-plus me-2"></i>Ajouter des Participants
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" id="ajouterEmployeForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="ajouter_employe">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Sélectionner un employé</label>
+                                <select name="employe" class="form-select" id="selectEmploye" required>
+                                    <option value="">Choisir un employé...</option>
+                                    {% for employe in employes %}
+                                    <option value="{{ employe.id }}">
+                                        {{ employe.nom_complet }} - {{ employe.poste }} 
+                                        {% if employe.departement %}({{ employe.departement.nom }}){% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus me-1"></i> Ajouter
+                                </button>
+                                
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#creerEmployeModal">
+                                    <i class="fas fa-user-plus me-1"></i> Nouvel employé
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="mt-3">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Sélectionnez les employés qui participeront à cette formation. 
+                                Vous pouvez en ajouter plusieurs.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Employés sélectionnés -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-users me-2"></i>Participants Sélectionnés
+                            <span class="badge bg-primary ms-2">{{ nombre_employes }}</span>
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        {% if employes_selectionnes %}
+                        <div class="list-group list-group-flush">
+                            {% for employe in employes_selectionnes %}
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span class="avatar" style="background-image: url(https://ui-avatars.com/api/?name={{ employe.nom_complet|urlencode }}&background=206bc4&color=fff)"></span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="font-weight-medium">{{ employe.nom_complet }}</div>
+                                        <div class="text-muted">{{ employe.poste }}</div>
+                                        {% if employe.departement %}
+                                        <small class="text-muted">{{ employe.departement.nom }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-auto">
+                                        <form method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="supprimer_employe">
+                                            <input type="hidden" name="employe_id" value="{{ employe.id }}">
+                                            <button type="submit" class="btn btn-icon btn-danger btn-sm" title="Retirer">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mt-3">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="continuer">
+                                <button type="submit" class="btn btn-success w-100 btn-lg btn-square">
+                                    <i class="fas fa-arrow-right me-2"></i> 
+                                    Continuer avec {{ nombre_employes }} participant(s)
+                                </button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <div class="empty">
+                            <div class="empty-img">
+                                <i class="fas fa-users fa-2x text-muted"></i>
+                            </div>
+                            <p class="empty-title">Aucun participant sélectionné</p>
+                            <p class="empty-subtitle text-muted">
+                                Ajoutez des employés à cette formation en utilisant le formulaire de gauche
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques des participants -->
+        {% if employes_selectionnes %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Répartition des Participants</h4>
+                        <div class="row">
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="card card-sm">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="bg-primary text-white avatar">
+                                                    <i class="fas fa-users"></i>
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="font-weight-medium">{{ nombre_employes }}</div>
+                                                <div class="text-muted">Total participants</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="card card-sm">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="bg-info text-white avatar">
+                                                    <i class="fas fa-building"></i>
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="font-weight-medium">
+                                                    {% with departements=employes_selectionnes|dictsort:"departement.nom" %}
+                                                        {{ departements|length }}
+                                                    {% endwith %}
+                                                </div>
+                                                <div class="text-muted">Départements</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal pour créer un nouvel employé -->
+<div class="modal fade" id="creerEmployeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i> Créer un nouvel employé
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="nouvelEmployeForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_prenom" class="form-label">Prénom *</label>
+                                <input type="text" name="prenom" class="form-control" id="id_prenom" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_nom" class="form-label">Nom *</label>
+                                <input type="text" name="nom" class="form-control" id="id_nom" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_matricule" class="form-label">Matricule *</label>
+                                <input type="text" name="matricule" class="form-control" id="id_matricule" required>
+                                <div class="form-text">Identifiant unique de l'employé</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_email" class="form-label">Email *</label>
+                                <input type="email" name="email" class="form-control" id="id_email" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_poste" class="form-label">Poste *</label>
+                        <input type="text" name="poste" class="form-control" id="id_poste" required>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Un mot de passe temporaire sera généré. L'employé pourra le modifier lors de sa première connexion.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="btnCreerEmploye">
+                    <i class="fas fa-save me-1"></i> Créer l'employé
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle me-2"></i> Succès
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>L'employé a été créé avec succès !</p>
+                <p>Vous pouvez maintenant le sélectionner dans la liste.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnCreerEmploye = document.getElementById('btnCreerEmploye');
+    const nouvelEmployeForm = document.getElementById('nouvelEmployeForm');
+    const selectEmploye = document.getElementById('selectEmploye');
+    const creerEmployeModal = document.getElementById('creerEmployeModal');
+    
+    btnCreerEmploye.addEventListener('click', function() {
+        const formData = new FormData(nouvelEmployeForm);
+        const jsonData = {};
+        
+        for (let [key, value] of formData.entries()) {
+            jsonData[key] = value;
+        }
+        
+        fetch('{% url "creer_employe_ajax" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(jsonData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const modal = bootstrap.Modal.getInstance(creerEmployeModal);
+                modal.hide();
+                
+                const newOption = new Option(data.employe_nom, data.employe_id);
+                selectEmploye.add(newOption);
+                selectEmploye.value = data.employe_id;
+                
+                nouvelEmployeForm.reset();
+                
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+            } else {
+                alert('Erreur: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Une erreur est survenue lors de la création de l\'employé.');
+        });
+    });
+    
+    creerEmployeModal.addEventListener('hidden.bs.modal', function () {
+        nouvelEmployeForm.reset();
+    });
+});
+</script>
+{% endblock %}

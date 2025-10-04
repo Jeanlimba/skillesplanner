@@ -1,0 +1,449 @@
+<!-- planification/templates/planification/etape_par_qui.html -->
+{% extends 'base.html' %}
+
+{% block page_title_text %}Sélection du Formateur{% endblock %}
+
+{% block extra_actions %}
+<a href="{% url 'etape_objectifs' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i> Retour
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Barre de progression -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="step-progress">
+                    <div class="step completed">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Identification</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Participants</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Objectifs</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Formateur</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Programme</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">6</div>
+                        <div class="step-label">Évaluation</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">7</div>
+                        <div class="step-label">Budget</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Étape 4: Par qui former ?
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post" id="formateurForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Type de Formateur</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Sélectionnez le type de formateur *</label>
+                            <div class="form-selectgroup">
+                                <label class="form-selectgroup-item">
+                                    <input type="radio" name="type_formateur" value="interne" class="form-selectgroup-input" 
+                                           {% if formateur_data.type_formateur == 'interne' or not formateur_data.type_formateur %}checked{% endif %}>
+                                    <span class="form-selectgroup-label">
+                                        <i class="fas fa-building me-2"></i>
+                                        Formateur Interne
+                                    </span>
+                                </label>
+                                <label class="form-selectgroup-item">
+                                    <input type="radio" name="type_formateur" value="externe" class="form-selectgroup-input"
+                                           {% if formateur_data.type_formateur == 'externe' %}checked{% endif %}>
+                                    <span class="form-selectgroup-label">
+                                        <i class="fas fa-external-link-alt me-2"></i>
+                                        Formateur Externe
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formateur Interne -->
+                    <div id="formateur-interne" {% if formateur_data.type_formateur == 'externe' %}style="display:none;"{% endif %}>
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2">Formateur Interne</h5>
+                            <div class="mb-3">
+                                <label for="formateur_id" class="form-label">Sélectionner un formateur interne *</label>
+                                <div class="input-group">
+                                    <select name="formateur_id" id="formateur_id" class="form-select" required>
+                                        <option value="">Choisir un formateur...</option>
+                                        {% for formateur in formateurs_internes %}
+                                        <option value="{{ formateur.id }}" 
+                                                {% if formateur_data.formateur_id == formateur.id|stringformat:"i" %}selected{% endif %}>
+                                            {{ formateur.nom_complet }} 
+                                            {% if formateur.specialite %}- {{ formateur.specialite }}{% endif %}
+                                            {% if formateur.tarif_horaire > 0 %}({{ formateur.tarif_horaire }}€/h){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalFormateurInterne">
+                                        <i class="fas fa-plus"></i> Ajouter
+                                    </button>
+                                </div>
+                                <div class="form-text">Liste des formateurs internes (agents) disponibles</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formateur Externe -->
+                    <div id="formateur-externe" {% if formateur_data.type_formateur != 'externe' %}style="display:none;"{% endif %}>
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2">Formateur Externe</h5>
+                            
+                            <!-- Sélection d'un organisme existant -->
+                            <div class="mb-3">
+                                <label for="organisme_id" class="form-label">Sélectionner un organisme formateur *</label>
+                                <div class="input-group">
+                                    <select name="organisme_id" id="organisme_id" class="form-select" required>
+                                        <option value="">Choisir un organisme...</option>
+                                        {% for organisme in organismes_externes %}
+                                        <option value="{{ organisme.id }}" 
+                                                {% if formateur_data.organisme_id == organisme.id|stringformat:"i" %}selected{% endif %}>
+                                            {{ organisme.nom }} 
+                                            {% if organisme.specialites %}({{ organisme.specialites }}){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalOrganismeExterne">
+                                        <i class="fas fa-plus"></i> Ajouter
+                                    </button>
+                                </div>
+                                <div class="form-text">Liste des organismes formateurs externes disponibles</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations complémentaires -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Informations Complémentaires</h5>
+                        <div class="mb-3">
+                            <label for="commentaires_formateur" class="form-label">Commentaires sur le formateur</label>
+                            <textarea name="commentaires_formateur" class="form-control" rows="3" 
+                                      placeholder="Spécialités, expérience, recommandations...">{{ formateur_data.commentaires_formateur }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Information :</strong> Le choix du formateur impacte la qualité pédagogique et le coût de la formation.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'etape_objectifs' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Précédent
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Suivant <i class="fas fa-arrow-right me-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour ajouter un formateur interne -->
+<div class="modal fade" id="modalFormateurInterne" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i> Ajouter un Formateur Interne
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formFormateurInterne">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="employe_id" class="form-label">Sélectionner un employé *</label>
+                        <select name="employe_id" id="employe_id" class="form-select" required>
+                            <option value="">Choisir un employé...</option>
+                            <!-- Les employés seront chargés via AJAX -->
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="specialite" class="form-label">Spécialité *</label>
+                        <input type="text" name="specialite" class="form-control" id="specialite" 
+                               placeholder="Ex: Techniques de vente, Management, Digital..." required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="tarif_horaire" class="form-label">Tarif horaire (€)</label>
+                        <input type="number" name="tarif_horaire" class="form-control" id="tarif_horaire" 
+                               step="0.01" min="0" value="0">
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        L'employé sélectionné sera ajouté à la liste des formateurs internes.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="btnCreerFormateurInterne">
+                    <i class="fas fa-save me-1"></i> Créer le Formateur
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour ajouter un organisme externe -->
+<div class="modal fade" id="modalOrganismeExterne" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-building me-2"></i> Ajouter un Organisme Formateur
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formOrganismeExterne">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nom_organisme" class="form-label">Nom de l'organisme *</label>
+                                <input type="text" name="nom" class="form-control" id="nom_organisme" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="siret" class="form-label">SIRET *</label>
+                                <input type="text" name="siret" class="form-control" id="siret" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="adresse" class="form-label">Adresse</label>
+                        <textarea name="adresse" class="form-control" id="adresse" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="telephone" class="form-label">Téléphone</label>
+                                <input type="text" name="telephone" class="form-control" id="telephone">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email_organisme" class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" id="email_organisme">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="contact_principal" class="form-label">Contact principal *</label>
+                                <input type="text" name="contact_principal" class="form-control" id="contact_principal" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="specialites" class="form-label">Spécialités</label>
+                                <input type="text" name="specialites" class="form-control" id="specialites" 
+                                       placeholder="Séparées par des virgules">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="btnCreerOrganismeExterne">
+                    <i class="fas fa-save me-1"></i> Créer l'Organisme
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle me-2"></i> Succès
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="successMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeFormateur = document.querySelectorAll('input[name="type_formateur"]');
+    const formateurInterne = document.getElementById('formateur-interne');
+    const formateurExterne = document.getElementById('formateur-externe');
+    const selectFormateur = document.getElementById('formateur_id');
+    const selectOrganisme = document.getElementById('organisme_id');
+    
+    // Basculer entre formateur interne/externe
+    typeFormateur.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'interne') {
+                formateurInterne.style.display = 'block';
+                formateurExterne.style.display = 'none';
+                selectFormateur.required = true;
+                selectOrganisme.required = false;
+            } else {
+                formateurInterne.style.display = 'none';
+                formateurExterne.style.display = 'block';
+                selectFormateur.required = false;
+                selectOrganisme.required = true;
+            }
+        });
+    });
+    
+    // Charger les employés pour le modal formateur interne
+    const modalFormateurInterne = document.getElementById('modalFormateurInterne');
+    modalFormateurInterne.addEventListener('show.bs.modal', function() {
+        fetch('{% url "api_employes_disponibles" %}')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur réseau');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const selectEmploye = document.getElementById('employe_id');
+                selectEmploye.innerHTML = '<option value="">Choisir un employé...</option>';
+                if (data.employes && data.employes.length > 0) {
+                    data.employes.forEach(employe => {
+                        const option = new Option(
+                            `${employe.nom_complet} - ${employe.poste}`,
+                            employe.id
+                        );
+                        selectEmploye.add(option);
+                    });
+                } else {
+                    const option = new Option('Aucun employé disponible', '');
+                    option.disabled = true;
+                    selectEmploye.add(option);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                const selectEmploye = document.getElementById('employe_id');
+                selectEmploye.innerHTML = '<option value="">Erreur de chargement</option>';
+            });
+    });
+    
+    // Créer formateur interne
+    document.getElementById('btnCreerFormateurInterne').addEventListener('click', function() {
+        const formData = new FormData(document.getElementById('formFormateurInterne'));
+        const jsonData = {
+            type_creation: 'formateur_interne',
+            employe_id: formData.get('employe_id'),
+            specialite: formData.get('specialite'),
+            tarif_horaire: formData.get('tarif_horaire')
+        };
+        
+        creerFormateur(jsonData, 'formateur_id', 'Formateur interne créé avec succès !');
+    });
+    
+    // Créer organisme externe
+    document.getElementById('btnCreerOrganismeExterne').addEventListener('click', function() {
+        const formData = new FormData(document.getElementById('formOrganismeExterne'));
+        const jsonData = {
+            type_creation: 'organisme_externe',
+            nom: formData.get('nom'),
+            siret: formData.get('siret'),
+            adresse: formData.get('adresse'),
+            telephone: formData.get('telephone'),
+            email: formData.get('email'),
+            contact_principal: formData.get('contact_principal'),
+            specialites: formData.get('specialites')
+        };
+        
+        creerFormateur(jsonData, 'organisme_id', 'Organisme créé avec succès !');
+    });
+    
+    function creerFormateur(data, selectId, successMessage) {
+        fetch('{% url "creer_formateur_ajax" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Fermer le modal
+                const modal = bootstrap.Modal.getInstance(document.activeElement.closest('.modal'));
+                modal.hide();
+                
+                // Ajouter à la sélection
+                const select = document.getElementById(selectId);
+                const newOption = new Option(
+                    data.type_creation === 'formateur_interne' ? result.formateur_nom : result.organisme_nom,
+                    data.type_creation === 'formateur_interne' ? result.formateur_id : result.organisme_id
+                );
+                select.add(newOption);
+                select.value = data.type_creation === 'formateur_interne' ? result.formateur_id : result.organisme_id;
+                
+                // Afficher message de succès
+                document.getElementById('successMessage').textContent = successMessage;
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+                
+                // Réinitialiser le formulaire
+                document.activeElement.closest('.modal').querySelector('form').reset();
+            } else {
+                alert('Erreur: ' + result.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Une erreur est survenue lors de la création.');
+        });
+    }
+});
+</script>
+{% endblock %}

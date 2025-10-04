@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block page_title_text %}Nouvelle Planification{% endblock %}
+
+{% block extra_actions %}
+<a href="{% url 'planification_formations' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i> Retour
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-body p-4 text-center">
+            <div class="empty">
+                <div class="empty-img">
+                    <i class="fas fa-rocket fa-4x text-primary"></i>
+                </div>
+                <p class="empty-title">Démarrer une nouvelle planification</p>
+                <p class="empty-subtitle text-muted">
+                    Créez une planification complète en 7 étapes structurées
+                </p>
+
+                <!-- Étapes du processus -->
+                <div class="container">
+                    <div class="step-progress">
+                        <div class="step active">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Informations</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Participants</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Objectifs</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-label">Formateur</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">5</div>
+                            <div class="step-label">Programme</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">6</div>
+                            <div class="step-label">Évaluation</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">7</div>
+                            <div class="step-label">Budget</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="empty-action">
+                    <a href="{% url 'etape_informations' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-play me-2"></i>Commencer le Processus
+                    </a>
+                </div>
+
+                <div class="mt-4">
+                    <small class="text-muted">
+                        <i class="fas fa-lightbulb me-1"></i>
+                        Processus basé sur le canevas pédagogique professionnel
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

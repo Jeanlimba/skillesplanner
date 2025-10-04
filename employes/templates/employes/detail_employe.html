@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-user"></i> {{ employe.nom_complet }}</h1>
+    <div>
+        <a href="{% url 'modifier_employe' employe.id %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Modifier
+        </a>
+        <a href="{% url 'liste_employes' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Informations de base -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Informations personnelles</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="30%">Matricule:</th>
+                        <td>{{ employe.matricule }}</td>
+                    </tr>
+                    <tr>
+                        <th>Email:</th>
+                        <td>{{ employe.user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Département:</th>
+                        <td>{{ employe.departement.nom|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Poste:</th>
+                        <td>{{ employe.poste }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date d'embauche:</th>
+                        <td>{{ employe.date_embauche }}</td>
+                    </tr>
+                    <tr>
+                        <th>Responsable:</th>
+                        <td>
+                            {% if employe.est_responsable %}
+                            <span class="badge bg-success">Oui</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Non</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compétences -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Compétences</h5>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterCompetence">
+                    <i class="fas fa-plus"></i> Ajouter
+                </button>
+            </div>
+            <div class="card-body">
+                {% if competences %}
+                <div class="list-group">
+                    {% for comp in competences %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{ comp.competence.nom }}</h6>
+                            <small class="text-muted">{{ comp.competence.description }}</small>
+                        </div>
+                        <span class="badge bg-{% if comp.niveau == 'E' %}success{% elif comp.niveau == 'I' %}warning{% else %}secondary{% endif %}">
+                            {{ comp.get_niveau_display }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">Aucune compétence enregistrée</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour ajouter une compétence -->
+<div class="modal fade" id="ajouterCompetence" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter une compétence</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    {{ form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

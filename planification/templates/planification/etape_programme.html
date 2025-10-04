@@ -1,0 +1,169 @@
+<!-- planification/templates/planification/etape_programme.html -->
+{% extends 'base.html' %}
+
+{% block page_title_text %}Programme Pédagogique{% endblock %}
+
+{% block extra_actions %}
+<a href="{% url 'etape_par_qui' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i> Retour
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Barre de progression -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="step-progress">
+                    <div class="step completed">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Identification</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Participants</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Objectifs</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Formateur</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Programme</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">6</div>
+                        <div class="step-label">Évaluation</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">7</div>
+                        <div class="step-label">Budget</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-list-alt me-2"></i>Étape 5: Programme Pédagogique Détaillé
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post" id="programmeForm">
+                    {% csrf_token %}
+                    
+                    <!-- Description globale -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Description Globale</h5>
+                        
+                        <div class="mb-3">
+                            <label for="contenu_formation" class="form-label">Contenu de la formation</label>
+                            <textarea name="contenu_formation" class="form-control" id="contenu_formation" 
+                                      rows="4" placeholder="Description complète du contenu de la formation, thématiques abordées, approche générale...">{{ programme_data.contenu_formation }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="methodologie_retenue" class="form-label">Méthodologie retenue</label>
+                            <textarea name="methodologie_retenue" class="form-control" id="methodologie_retenue" 
+                                      rows="3" placeholder="Approche pédagogique globale, principes méthodologiques...">{{ programme_data.methodologie_retenue }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Séquences pédagogiques -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Séquences Pédagogiques Détaillées</h5>
+                        <p class="text-muted">Définissez l'architecture détaillée de votre formation</p>
+                        
+                        <div id="sequences-container">
+                            <!-- Séquence par défaut -->
+                            <div class="sequence-card card mb-3">
+                                <div class="card-header bg-light">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">Séquence 1</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-danger supprimer-sequence" disabled>
+                                            <i class="fas fa-times"></i> Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <label class="form-label">Ordre *</label>
+                                            <input type="number" name="sequence_ordre[]" class="form-control" min="1" value="1" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Intitulé *</label>
+                                            <input type="text" name="sequence_intitule[]" class="form-control" placeholder="Ex: Introduction aux concepts" required>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Durée (h) *</label>
+                                            <input type="number" name="sequence_duree[]" class="form-control" step="0.5" min="0.5" value="1.0" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Méthode *</label>
+                                            <select name="sequence_methode[]" class="form-select" required>
+                                                <option value="EX">Exposé interactif</option>
+                                                <option value="AT">Atelier pratique</option>
+                                                <option value="CI">Classe inversée</option>
+                                                <option value="EC">Étude de cas</option>
+                                                <option value="SJ">Serious game</option>
+                                                <option value="CO">Co-développement</option>
+                                                <option value="JR">Jeux de rôle</option>
+                                                <option value="DI">Démonstration</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Objectif de la séquence *</label>
+                                            <textarea name="sequence_objectif[]" class="form-control" rows="2" placeholder="Ce que les participants sauront faire à l'issue de cette séquence..." required></textarea>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Supports & Activités *</label>
+                                            <textarea name="sequence_supports[]" class="form-control" rows="2" placeholder="Matériel, documents, exercices..." required></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="btn btn-outline-primary" id="ajouter-sequence">
+                            <i class="fas fa-plus me-1"></i> Ajouter une séquence
+                        </button>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Conseil pour un programme efficace</h6>
+                        <div class="small">
+                            <strong>Variété</strong> : Alternez méthodes actives et passives<br>
+                            <strong>Progression</strong> : Du simple au complexe<br>
+                            <strong>Pratique</strong> : Prévoyez des temps d'application<br>
+                            <strong>Adaptation</strong> : Tenez compte du rythme des apprenants
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'etape_par_qui' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Précédent
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Suivant <i class="fas fa-arrow-right me-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Le script JavaScript reste identique -->
+<script>
+// ... même script que précédemment ...
+</script>
+{% endblock %}

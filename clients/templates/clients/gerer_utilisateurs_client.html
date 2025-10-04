@@ -1,0 +1,205 @@
+<!-- clients/templates/clients/gerer_utilisateurs_client.html -->
+{% extends 'base.html' %}
+
+{% block page_title_text %}Gestion des Utilisateurs - {{ client.nom }}{% endblock %}
+
+{% block extra_actions %}
+<a href="{% url 'tableau_de_bord_super_admin' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i> Retour
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0">{{ client.nom }} ({{ client.sigle }})</h4>
+                        <p class="text-muted mb-0">Gestion des utilisateurs</p>
+                    </div>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAjouterUtilisateur">
+                        <i class="fas fa-user-plus me-1"></i> Ajouter un Utilisateur
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des utilisateurs -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Utilisateurs du Client</h3>
+            </div>
+            <div class="card-body">
+                {% if utilisateurs %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Téléphone</th>
+                                <th>Dernière connexion</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for utilisateur in utilisateurs %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="avatar me-3" style="background-image: url(https://ui-avatars.com/api/?name={{ utilisateur.user.get_full_name|urlencode }}&background=206bc4&color=fff)"></span>
+                                        <div>
+                                            <strong>{{ utilisateur.user.get_full_name }}</strong>
+                                            <div class="text-muted">@{{ utilisateur.user.username }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ utilisateur.user.email }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if utilisateur.role == 'SUPER_ADMIN' %}bg-danger
+                                        {% elif utilisateur.role == 'ADMIN_CLIENT' %}bg-warning
+                                        {% elif utilisateur.role == 'VALIDATION_2' %}bg-info
+                                        {% elif utilisateur.role == 'VALIDATION_1' %}bg-primary
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ utilisateur.get_role_display }}
+                                    </span>
+                                </td>
+                                <td>{{ utilisateur.telephone|default:"-" }}</td>
+                                <td>
+                                    {% if utilisateur.user.last_login %}
+                                    {{ utilisateur.user.last_login|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                    <span class="text-muted">Jamais</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-list">
+                                        <a href="#" class="btn btn-sm btn-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-danger" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-info" title="Réinitialiser mot de passe">
+                                            <i class="fas fa-key"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty">
+                    <div class="empty-img">
+                        <i class="fas fa-users fa-3x text-muted"></i>
+                    </div>
+                    <p class="empty-title">Aucun utilisateur</p>
+                    <p class="empty-subtitle text-muted">
+                        Ajoutez des utilisateurs pour ce client
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour ajouter un utilisateur -->
+<div class="modal fade" id="modalAjouterUtilisateur" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i> Ajouter un Utilisateur
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_nom" class="form-label">Nom *</label>
+                                <input type="text" name="nom" class="form-control" id="id_nom" 
+                                       value="{{ form.nom.value|default:'' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_prenom" class="form-label">Prénom *</label>
+                                <input type="text" name="prenom" class="form-control" id="id_prenom" 
+                                       value="{{ form.prenom.value|default:'' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_username" class="form-label">Nom d'utilisateur *</label>
+                                <input type="text" name="username" class="form-control" id="id_username" 
+                                       value="{{ form.username.value|default:'' }}" required>
+                                <div class="form-text">Identifiant de connexion unique</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_email" class="form-label">Email *</label>
+                                <input type="email" name="email" class="form-control" id="id_email" 
+                                       value="{{ form.email.value|default:'' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_password" class="form-label">Mot de passe *</label>
+                                <input type="password" name="password" class="form-control" id="id_password" required>
+                                <div class="form-text">Minimum 8 caractères</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_telephone" class="form-label">Téléphone</label>
+                                <input type="text" name="telephone" class="form-control" id="id_telephone" 
+                                       value="{{ form.telephone.value|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_role" class="form-label">Rôle *</label>
+                        <select name="role" class="form-select" id="id_role" required>
+                            <option value="">Sélectionnez un rôle...</option>
+                            <option value="SAISIE">Saisie</option>
+                            <option value="VALIDATION_1">Validation Niveau 1</option>
+                            <option value="VALIDATION_2">Validation Niveau 2</option>
+                            <option value="ADMIN_CLIENT">Administrateur Client</option>
+                        </select>
+                        <div class="form-text">
+                            <strong>Saisie</strong>: Peut créer et soumettre des planifications<br>
+                            <strong>Validation N1</strong>: Peut valider/rejeter les soumissions<br>
+                            <strong>Validation N2</strong>: Peut valider définitivement<br>
+                            <strong>Admin Client</strong>: Gestion complète du client
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Créer l'Utilisateur
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

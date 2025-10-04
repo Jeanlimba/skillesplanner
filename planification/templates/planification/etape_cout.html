@@ -1,0 +1,206 @@
+<!-- planification/templates/planification/etape_cout.html -->
+{% extends 'base.html' %}
+
+{% block page_title_text %}Budget et Coût{% endblock %}
+
+{% block extra_actions %}
+<a href="{% url 'etape_evaluation' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i> Retour
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Barre de progression améliorée -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="step-progress">
+                    <div class="step completed">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Informations</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Participants</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Objectifs</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Formateur</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Programme</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">6</div>
+                        <div class="step-label">Évaluation</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-number">7</div>
+                        <div class="step-label">Budget</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-euro-sign me-2"></i>Étape 7: Budget et Coût
+                </h3>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Détail des coûts de la formation</h5>
+                <p class="text-muted">Renseignez tous les coûts associés à cette formation.</p>
+                
+                <form method="post" id="coutForm">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Coûts principaux -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="prix_formation" class="form-label">Prix de la formation (€) *</label>
+                                <input type="number" name="prix_formation" class="form-control" id="prix_formation" 
+                                       step="0.01" min="0" value="0" required>
+                                <div class="form-text">Coût direct de la formation (honoraires formateur)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="frais_transport" class="form-label">Frais de transport (€)</label>
+                                <input type="number" name="frais_transport" class="form-control" id="frais_transport" 
+                                       step="0.01" min="0" value="0">
+                                <div class="form-text">Déplacements formateur et/ou participants</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="frais_sejour" class="form-label">Frais de séjour (€)</label>
+                                <input type="number" name="frais_sejour" class="form-control" id="frais_sejour" 
+                                       step="0.01" min="0" value="0">
+                                <div class="form-text">Hébergement, per diem</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="frais_restauration" class="form-label">Frais de restauration (€)</label>
+                                <input type="number" name="frais_restauration" class="form-control" id="frais_restauration" 
+                                       step="0.01" min="0" value="0">
+                                <div class="form-text">Repas, pauses café</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="autres_frais" class="form-label">Autres frais (€)</label>
+                                <input type="number" name="autres_frais" class="form-control" id="autres_frais" 
+                                       step="0.01" min="0" value="0">
+                                <div class="form-text">Matériel pédagogique, documentation, location salle...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="mode_paiement" class="form-label">Mode de paiement</label>
+                                <select name="mode_paiement" id="mode_paiement" class="form-select">
+                                    <option value="">Sélectionnez...</option>
+                                    <option value="Virement">Virement bancaire</option>
+                                    <option value="Chèque">Chèque</option>
+                                    <option value="Carte">Carte bancaire</option>
+                                    <option value="Prélèvement">Prélèvement</option>
+                                    <option value="Espèces">Espèces</option>
+                                    <option value="Autre">Autre</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Résumé des coûts -->
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Résumé des coûts</h6>
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <small class="text-muted">Formation</small>
+                                    <div class="fw-bold" id="resume_formation">0 €</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Transport</small>
+                                    <div class="fw-bold" id="resume_transport">0 €</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Séjour</small>
+                                    <div class="fw-bold" id="resume_sejour">0 €</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Total</small>
+                                    <div class="fw-bold fs-5 text-primary" id="resume_total">0 €</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Vérification :</strong> Vérifiez que tous les coûts sont correctement renseignés avant de finaliser la planification.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'etape_evaluation' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Précédent
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-check-circle me-1"></i> Finaliser la Planification
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('coutForm');
+    const inputs = form.querySelectorAll('input[type="number"]');
+    
+    function updateResume() {
+        let total = 0;
+        const valeurs = {};
+        
+        inputs.forEach(input => {
+            const valeur = parseFloat(input.value) || 0;
+            valeurs[input.name] = valeur;
+            total += valeur;
+        });
+        
+        // Mettre à jour les résumés
+        document.getElementById('resume_formation').textContent = valeurs.prix_formation.toFixed(2) + ' €';
+        document.getElementById('resume_transport').textContent = valeurs.frais_transport.toFixed(2) + ' €';
+        document.getElementById('resume_sejour').textContent = valeurs.frais_sejour.toFixed(2) + ' €';
+        document.getElementById('resume_total').textContent = total.toFixed(2) + ' €';
+    }
+    
+    // Écouter les changements sur tous les inputs
+    inputs.forEach(input => {
+        input.addEventListener('input', updateResume);
+    });
+    
+    // Initialiser le résumé
+    updateResume();
+});
+</script>
+{% endblock %}

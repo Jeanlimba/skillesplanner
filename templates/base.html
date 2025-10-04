@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Système de Gestion des Formations">
+    <meta name="author" content="CHIRPA">
+    <meta name="keywords" content="">
+    
+    <title>{% block title %}Gestion des Formations{% endblock %}</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler-vendors.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .step-progress {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin: 2rem 0;
+        }
+        .step-progress::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--tblr-border-color);
+            z-index: 1;
+        }
+        .step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--tblr-border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-weight: 600;
+            border: 3px solid var(--tblr-bg-surface);
+            transition: all 0.3s ease;
+        }
+        .step.active .step-number {
+            background: var(--tblr-primary);
+            color: white;
+            box-shadow: 0 0 0 4px rgba(var(--tblr-primary-rgb), 0.2);
+        }
+        .step.completed .step-number {
+            background: var(--tblr-success);
+            color: white;
+        }
+        .step-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--tblr-muted);
+        }
+        .step.active .step-label {
+            color: var(--tblr-primary);
+            font-weight: 600;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+            box-shadow: var(--tblr-shadow-card);
+        }
+        .stat-card {
+            border-left: 4px solid var(--tblr-primary);
+        }
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, var(--tblr-primary) 0%, #2c7be5 100%);
+        }
+        .formation-card {
+            border: 1px solid var(--tblr-border-color);
+            transition: all 0.3s ease;
+        }
+        .formation-card:hover {
+            border-color: var(--tblr-primary);
+            box-shadow: var(--tblr-shadow-card);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="navbar navbar-expand-md navbar-light d-print-none">
+        <div class="container-xl">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+                <a href="{% url 'tableau_de_bord' %}">
+                    <i class="fas fa-graduation-cap text-primary me-2"></i>
+                    Formations CHIRPA
+                </a>
+            </h1>
+            
+            <div class="navbar-nav flex-row order-md-last">
+                {% if user.is_authenticated %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown">
+                        <div class="d-none d-xl-block ps-2">
+                            <div>{{ user.get_full_name|default:user.username }}</div>
+                            <div class="mt-1 small text-muted">Administrateur</div>
+                        </div>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="/admin/">
+                            <i class="fas fa-cog me-2"></i> Administration
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <div class="navbar-expand-md">
+        <div class="collapse navbar-collapse" id="navbar-menu">
+            <div class="navbar navbar-light">
+                <div class="container-xl">
+                    <ul class="navbar-nav">
+                        <li class="nav-item {% if request.resolver_match.url_name == 'tableau_de_bord' %}active{% endif %}">
+                            <a class="nav-link" href="{% url 'tableau_de_bord' %}">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                </span>
+                                <span class="nav-link-title">Tableau de Bord</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if 'evaluation' in request.resolver_match.url_name %}active{% endif %}">
+                            <a class="nav-link" href="{% url 'evaluation_besoins' %}">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </span>
+                                <span class="nav-link-title">Évaluation</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if 'planification' in request.resolver_match.url_name %}active{% endif %}">
+                            <a class="nav-link" href="{% url 'planification_formations' %}">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </span>
+                                <span class="nav-link-title">Planification</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if 'suivi' in request.resolver_match.url_name %}active{% endif %}">
+                            <a class="nav-link" href="{% url 'suivi_evaluations' %}">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                    <i class="fas fa-chart-line"></i>
+                                </span>
+                                <span class="nav-link-title">Suivi & Évaluation</span>
+                            </a>
+                        </li>
+                        {% if request.profil and request.profil.est_super_admin %}
+                        <li class="nav-item {% if 'clients' in request.resolver_match.url_name %}active{% endif %}">
+                            <a class="nav-link" href="{% url 'clients:tableau_de_bord_super_admin' %}">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                    <i class="fas fa-crown"></i>
+                                </span>
+                                <span class="nav-link-title">Super Admin</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="page-wrapper">
+        <div class="container-xl">
+            <!-- Page title -->
+            <div class="page-header d-print-none">
+                <div class="row align-items-center">
+                    <div class="col">
+                        {% block page_title %}
+                        <h2 class="page-title">{% block page_title_text %}Tableau de Bord{% endblock %}</h2>
+                        {% endblock %}
+                    </div>
+                    {% block page_actions %}
+                    <div class="col-auto ms-auto d-print-none">
+                        <div class="btn-list">
+                            {% block extra_actions %}{% endblock %}
+                        </div>
+                    </div>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="page-body">
+            <div class="container-xl">
+                {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <a class="btn-close" data-bs-dismiss="alert"></a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% block content %}
+                <!-- Content will be here -->
+                {% endblock %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer footer-transparent d-print-none">
+            <div class="container-xl">
+                <div class="row text-center align-items-center flex-row-reverse">
+                    <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+                        <ul class="list-inline list-inline-dots mb-0">
+                            <li class="list-inline-item">
+                                Copyright © 2024
+                                <a href="." class="link-secondary">CHIRPA</a>.
+                                Tous droits réservés.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+
+    <script>
+    // Theme switcher
+    document.addEventListener("DOMContentLoaded", function () {
+        const themeToggle = document.querySelector('.theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+        }
+    });
+    </script>
+</body>
+</html>

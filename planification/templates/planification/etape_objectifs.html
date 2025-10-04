@@ -1,0 +1,206 @@
+<!-- planification/templates/planification/etape_objectifs.html -->
+{% extends 'base.html' %}
+
+{% block page_title_text %}Objectifs de la Formation{% endblock %}
+
+{% block extra_actions %}
+<a href="{% url 'etape_qui' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i> Retour
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Barre de progression -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="step-progress">
+                    <div class="step completed">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Identification</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Participants</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Objectifs</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Formateur</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Programme</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">6</div>
+                        <div class="step-label">Évaluation</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">7</div>
+                        <div class="step-label">Budget</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-bullseye me-2"></i>Étape 3: Objectifs Pédagogiques
+                </h3>
+            </div>
+            <div class="card-body">
+                <!-- Résumé des participants -->
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-users me-3 fa-lg"></i>
+                        <div>
+                            <strong>{{ nombre_participants }} participant(s) sélectionné(s)</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Sélection de la Formation -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Contenu de la Formation</h5>
+                        
+                        <div class="mb-3">
+                            <label for="formation_existante" class="form-label">Formation existante</label>
+                            <select name="formation_existante" id="formation_existante" class="form-select">
+                                <option value="">Sélectionnez une formation du catalogue...</option>
+                                {% for formation in formations %}
+                                <option value="{{ formation.id }}" 
+                                        {% if objectifs_data.formation_existante == formation.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ formation.intitule }} ({{ formation.duree_jours }} jours)
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Ou créez une formation sur mesure ci-dessous</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="formation_sur_mesure" class="form-label">Formation sur mesure</label>
+                            <input type="text" name="formation_sur_mesure" class="form-control" 
+                                   id="formation_sur_mesure" placeholder="Nom de la formation personnalisée"
+                                   value="{{ objectifs_data.formation_sur_mesure }}">
+                        </div>
+                    </div>
+
+                    <!-- Objectifs Pédagogiques SMART -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Objectifs Pédagogiques</h5>
+                        
+                        <div class="mb-3">
+                            <label for="objectifs_pedagogiques" class="form-label">Objectifs pédagogiques SMART *</label>
+                            <textarea name="objectifs_pedagogiques" class="form-control" id="objectifs_pedagogiques" 
+                                      rows="4" placeholder="À l'issue de la formation, les participants seront capables de...
+Exemple SMART : 
+- Présenter efficacement nos produits en 5 minutes devant un client
+- Négocier un contrat avec une marge minimum de 15%
+- Utiliser le CRM pour suivre 100% des opportunités commerciales" required>{{ objectifs_data.objectifs_pedagogiques }}</textarea>
+                            <div class="form-text">
+                                Formulez des objectifs SMART (Spécifiques, Mesurables, Atteignables, Réalistes, Temporels)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compétences visées -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Compétences Visées</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Sélectionnez les compétences cibles</label>
+                            <div class="row" id="competences-container">
+                                {% for competence in competences %}
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="competences_visees" value="{{ competence.id }}"
+                                               {% if competence.id in objectifs_data.competences_visees %}checked{% endif %}>
+                                        <span class="form-check-label">
+                                            <strong>{{ competence.nom }}</strong>
+                                            {% if competence.description %}
+                                            <br><small class="text-muted">{{ competence.description|truncatewords:10 }}</small>
+                                            {% endif %}
+                                        </span>
+                                    </label>
+                                </div>
+                                {% empty %}
+                                <div class="col-12">
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Aucune compétence n'est définie dans le catalogue.
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prérequis -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Prérequis</h5>
+                        
+                        <div class="mb-3">
+                            <label for="prerequis_connaissances" class="form-label">Prérequis connaissances</label>
+                            <textarea name="prerequis_connaissances" class="form-control" id="prerequis_connaissances" 
+                                      rows="2" placeholder="Connaissances préalables requises...">{{ objectifs_data.prerequis_connaissances }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="prerequis_experience" class="form-label">Prérequis expérience</label>
+                            <textarea name="prerequis_experience" class="form-control" id="prerequis_experience" 
+                                      rows="2" placeholder="Expériences professionnelles requises...">{{ objectifs_data.prerequis_experience }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Conseil pour des objectifs SMART</h6>
+                        <div class="small">
+                            <strong>Spécifique</strong> : Clair et précis<br>
+                            <strong>Mesurable</strong> : Quantifiable avec des indicateurs<br>
+                            <strong>Atteignable</strong> : Réaliste compte tenu des contraintes<br>
+                            <strong>Réaliste</strong> : Adapté au public et au contexte<br>
+                            <strong>Temporel</strong> : Défini dans le temps
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'etape_qui' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Précédent
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Suivant <i class="fas fa-arrow-right me-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formationExistante = document.getElementById('formation_existante');
+    const formationSurMesure = document.getElementById('formation_sur_mesure');
+    
+    formationExistante.addEventListener('change', function() {
+        if (this.value) {
+            formationSurMesure.value = '';
+        }
+    });
+    
+    formationSurMesure.addEventListener('input', function() {
+        if (this.value) {
+            formationExistante.value = '';
+        }
+    });
+});
+</script>
+{% endblock %}

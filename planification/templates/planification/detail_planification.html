@@ -1,0 +1,423 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-file-alt"></i> Détail de la Planification</h1>
+    <div>
+        <a href="{% url 'planification_formations' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+        <a href="#" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Modifier
+        </a>
+    </div>
+</div>
+
+
+
+<div class="card mb-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-check-circle"></i> Planification Validée
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Référence :</strong> #PLAN-{{ planification.id }}</p>
+                <p><strong>Date de création :</strong> {{ planification.date_creation|date:"d/m/Y H:i" }}</p>
+                <p><strong>Statut :</strong> 
+                    <span class="badge bg-success">{{ planification.get_statut_display }}</span>
+                </p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Coût total :</strong> 
+                    <span class="fs-4 text-primary fw-bold">{{ planification.cout_total }} €</span>
+                </p>
+                <p><strong>Demandeur :</strong> {{ planification.demandeur.get_full_name }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Étape 1: Qui -->
+    <!-- Section Participants - CORRIGER -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-users"></i> Participants ({{ planification.nombre_participants }})
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for employe in planification.employes.all %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card formation-card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <span class="avatar" style="background-image: url(https://ui-avatars.com/api/?name={{ employe.nom_complet|urlencode }}&background=206bc4&color=fff)"></span>
+                                </div>
+                                <div class="col">
+                                    <div class="font-weight-medium">{{ employe.nom_complet }}</div>
+                                    <div class="text-muted">{{ employe.poste }}</div>
+                                    {% if employe.departement %}
+                                    <small class="text-muted">{{ employe.departement.nom }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if planification.nombre_participants > 1 %}
+            <div class="mt-3 p-3 bg-light rounded">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="h5 text-primary">{{ planification.cout_total }} €</div>
+                        <small class="text-muted">Coût total</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="h5 text-success">{{ planification.cout_par_participant|floatformat:2 }} €</div>
+                        <small class="text-muted">Coût par participant</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="h5 text-info">{{ planification.nombre_participants }}</div>
+                        <small class="text-muted">Nombre de participants</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Étape 2: En quoi -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-book text-info"></i> Étape 2: En quoi former
+                </h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Formation :</strong> {{ planification.formation_nom }}</p>
+                <p><strong>Type :</strong> 
+                    <span class="badge bg-{% if planification.type_formation == 'I' %}primary{% else %}info{% endif %}">
+                        {{ planification.get_type_formation_display }}
+                    </span>
+                </p>
+                <p><strong>Modalité :</strong> 
+                    <span class="badge bg-secondary">{{ planification.get_modalite_display }}</span>
+                </p>
+                <p><strong>Objectif :</strong> {{ planification.objectif }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Étape 3: Par qui -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-chalkboard-teacher text-warning"></i> Étape 3: Par qui former
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if planification.formateur_interne %}
+                <p><strong>Formateur interne :</strong> {{ planification.formateur_interne.nom_complet }}</p>
+                {% endif %}
+                
+                {% if planification.organisme_externe %}
+                <p><strong>Organisme externe :</strong> {{ planification.organisme_externe }}</p>
+                {% if planification.contact_externe %}
+                <p><strong>Contact :</strong> {{ planification.contact_externe }}</p>
+                {% endif %}
+                {% endif %}
+                
+                {% if not planification.formateur_interne and not planification.organisme_externe %}
+                <p class="text-muted">Aucun formateur spécifié</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Étape 4: Coût -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-euro-sign text-success"></i> Étape 4: Coût
+                </h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Prix formation :</strong> {{ planification.prix_formation }} €</p>
+                <p><strong>Frais transport :</strong> {{ planification.frais_transport }} €</p>
+                <p><strong>Frais séjour :</strong> {{ planification.frais_sejour }} €</p>
+                <p><strong>Frais restauration :</strong> {{ planification.frais_restauration }} €</p>
+                <p><strong>Autres frais :</strong> {{ planification.autres_frais }} €</p>
+                {% if planification.mode_paiement %}
+                <p><strong>Mode paiement :</strong> {{ planification.mode_paiement }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-info-circle"></i> Informations Générales
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Titre :</strong> {{ planification.titre_formation }}</p>
+                <p><strong>Durée :</strong> {{ planification.duree_totale_heures }}h ({{ planification.duree_totale_jours }} jours)</p>
+                <p><strong>Répartition :</strong> {{ planification.repartition_duree }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Lieu :</strong> {{ planification.lieu_formation }}</p>
+                <p><strong>Participants :</strong> {{ planification.participants_vises }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section Justification -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-target"></i> Justification et Objectifs
+        </h5>
+    </div>
+    <div class="card-body">
+        <p><strong>Problématique :</strong> {{ planification.situation_problematique }}</p>
+        <p><strong>Améliorations attendues :</strong> {{ planification.ameliorations_attendues }}</p>
+        <p><strong>Enjeux stratégiques :</strong> {{ planification.enjeux_strategiques }}</p>
+    </div>
+</div>
+
+<!-- Section Contenu et Méthodologie -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-book"></i> Contenu et Méthodologie
+        </h5>
+    </div>
+    <div class="card-body">
+        <p><strong>Contenu :</strong> {{ planification.contenu_formation|linebreaks }}</p>
+        <p><strong>Méthodologie :</strong> {{ planification.methodologie_retenue|linebreaks }}</p>
+    </div>
+</div>
+
+<!-- Section Matériel -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-tools"></i> Matériel Requis
+        </h5>
+    </div>
+    <div class="card-body">
+        <p>{{ planification.materiel_requis|linebreaks }}</p>
+    </div>
+</div>
+
+<!-- Résultats attendus -->
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0">Résultats et Performances Attendus</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Résultat attendu :</h6>
+                <p>{{ planification.resultat_attendu|linebreaks }}</p>
+            </div>
+            <div class="col-md-6">
+                <h6>Performance attendue :</h6>
+                <p>{{ planification.performance_attendu|linebreaks }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Section Participants -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-users"></i> Participants ({{ planification.nombre_participants }})
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for participant in planification.participantformation_set.all %}
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card formation-card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar" style="background-image: url(https://ui-avatars.com/api/?name={{ participant.employe.nom_complet|urlencode }}&background=206bc4&color=fff)"></span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-medium">{{ participant.employe.nom_complet }}</div>
+                                <div class="text-muted">{{ participant.employe.poste }}</div>
+                                {% if participant.employe.departement %}
+                                <small class="text-muted">{{ participant.employe.departement.nom }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge bg-{% if participant.statut_participation == 'C' %}success{% else %}secondary{% endif %}">
+                                    {{ participant.get_statut_participation_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if planification.nombre_participants > 1 %}
+        <div class="mt-3 p-3 bg-light rounded">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <div class="h5 text-primary">{{ planification.cout_total }} €</div>
+                    <small class="text-muted">Coût total</small>
+                </div>
+                <div class="col-md-4">
+                    <div class="h5 text-success">{{ planification.cout_par_participant|floatformat:2 }} €</div>
+                    <small class="text-muted">Coût par participant</small>
+                </div>
+                <div class="col-md-4">
+                    <div class="h5 text-info">{{ planification.nombre_participants }}</div>
+                    <small class="text-muted">Nombre de participants</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-tasks me-2"></i> Workflow de Validation
+        </h5>
+    </div>
+    <div class="card-body">
+        <!-- Barre de progression du workflow -->
+        <div class="workflow-progress mb-4">
+            <div class="step {% if planification.statut == 'B' %}active{% elif planification.statut in ['SOUMIS','VALIDE_1','VALIDE_2','V','P','C','T'] %}completed{% endif %}">
+                <div class="step-number">1</div>
+                <div class="step-label">Brouillon</div>
+            </div>
+            <div class="step {% if planification.statut == 'SOUMIS' %}active{% elif planification.statut in ['VALIDE_1','VALIDE_2','V','P','C','T'] %}completed{% endif %}">
+                <div class="step-number">2</div>
+                <div class="step-label">Soumis</div>
+            </div>
+            <div class="step {% if planification.statut == 'VALIDE_1' %}active{% elif planification.statut in ['VALIDE_2','V','P','C','T'] %}completed{% endif %}">
+                <div class="step-number">3</div>
+                <div class="step-label">Validé N1</div>
+            </div>
+            <div class="step {% if planification.statut == 'V' %}active{% elif planification.statut in ['P','C','T'] %}completed{% endif %}">
+                <div class="step-number">4</div>
+                <div class="step-label">Validé</div>
+            </div>
+        </div>
+
+        <!-- Actions selon le statut et les permissions -->
+        <div class="workflow-actions">
+            {% if planification.statut == 'B' and request.profil.peut_saisir %}
+            <form method="post" action="{% url 'soumettre_validation' planification.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-paper-plane me-1"></i> Soumettre pour validation
+                </button>
+            </form>
+            {% endif %}
+
+            {% if planification.statut == 'SOUMIS' and request.profil.peut_valider_niveau_1 %}
+            <form method="post" action="{% url 'valider_planification_n1' planification.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check me-1"></i> Valider Niveau 1
+                </button>
+            </form>
+            
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalRejet">
+                <i class="fas fa-times me-1"></i> Rejeter
+            </button>
+            {% endif %}
+
+            {% if planification.statut == 'VALIDE_1' and request.profil.peut_valider_niveau_2 %}
+            <form method="post" action="{% url 'valider_planification_n2' planification.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check-double me-1"></i> Valider Définitivement
+                </button>
+            </form>
+            
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalRejet">
+                <i class="fas fa-times me-1"></i> Rejeter
+            </button>
+            {% endif %}
+        </div>
+
+        <!-- Historique des validations -->
+        <div class="mt-4">
+            <h6>Historique des validations:</h6>
+            <ul class="list-unstyled">
+                {% if planification.date_soumission %}
+                <li><small>Soumis le: {{ planification.date_soumission|date:"d/m/Y H:i" }}</small></li>
+                {% endif %}
+                {% if planification.valideur_niveau_1 %}
+                <li><small>Validé N1 par: {{ planification.valideur_niveau_1.get_full_name }} le {{ planification.date_validation_1|date:"d/m/Y H:i" }}</small></li>
+                {% endif %}
+                {% if planification.valideur_niveau_2 %}
+                <li><small>Validé N2 par: {{ planification.valideur_niveau_2.get_full_name }} le {{ planification.date_validation_2|date:"d/m/Y H:i" }}</small></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<div class="mt-4 text-center">
+    <a href="{% url 'planification_formations' %}" class="btn btn-primary">
+        <i class="fas fa-list"></i> Voir toutes les planifications
+    </a>
+    <a href="{% url 'creer_planification' %}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Créer une nouvelle planification
+    </a>
+</div>
+
+
+<!-- Modal pour rejet -->
+<div class="modal fade" id="modalRejet" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Rejeter la planification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'rejeter_planification' planification.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="commentaire" class="form-label">Commentaire (obligatoire)</label>
+                        <textarea name="commentaire" class="form-control" rows="3" required 
+                                  placeholder="Expliquez les raisons du rejet..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning">Confirmer le rejet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
